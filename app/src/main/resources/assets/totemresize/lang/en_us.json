@@ -1,0 +1,9 @@
+{
+  "totemresize.title": "Totem Resizer",
+  "totemresize.category.general": "General",
+  "totemresize.option.totem_scale": "Totem Scale (1–10)",
+  "totemresize.option.totem_scale.tooltip": "Controls the size of the Totem of Undying.\n\n  1  = 0.1× (tiny, barely visible)\n  5  = 1.0× (default Minecraft size)\n  10 = 4.0× (massive, covers most of the screen)\n\nChanges apply only after you click Save & Exit.",
+  "totemresize.option.reset": "Reset to default (5)",
+  "key.categories.totemresize": "Totem Resizer",
+  "key.totemresize.open_config": "Open Config"
+}

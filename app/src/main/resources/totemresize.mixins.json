@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "totemresize.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "HeldItemRendererMixin",
+    "ItemRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

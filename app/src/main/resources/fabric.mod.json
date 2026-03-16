@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "totemresize",
+  "version": "${version}",
+  "name": "Totem Resizer",
+  "description": "Client-side Totem of Undying resizer with a config screen (1–10 scale slider).",
+  "authors": [
+    "YourName"
+  ],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "totemresize.client.TotemResizeClient"
+    ],
+    "modmenu": [
+      "totemresize.config.ModMenuIntegration"
+    ]
+  },
+  "mixins": [
+    "totemresize.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "fabric": "*",
+    "minecraft": ">=1.21.1 <1.22"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
+}
