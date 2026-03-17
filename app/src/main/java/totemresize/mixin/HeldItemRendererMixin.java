@@ -14,7 +14,8 @@ import totemresize.config.TotemResizeConfig;
 import totemresize.util.TotemResizeUtil;
 
 /**
- * Scales the held Totem of Undying in first-person view.
+ * Scales the held Totem of Undying in first-person view using the
+ * <b>Held Totem</b> scale value from config.
  *
  * <p>Uses priority 1001 so this mixin applies <em>after</em> most cosmetic
  * mods (default priority is 1000), preventing them from overriding the scale.
@@ -39,7 +40,7 @@ public class HeldItemRendererMixin {
             return;
         }
 
-        float scale = TotemResizeConfig.get().getRenderScale();
+        float scale = TotemResizeConfig.get().getHeldRenderScale();
         if (Float.compare(scale, 1.0f) == 0) {
             return; // default size – skip entirely for zero overhead
         }

@@ -9,9 +9,16 @@ import java.io.BufferedWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * Handles loading and saving of {@link TotemResizeConfigData} to
+ * {@code totemscale.json} in the Fabric config directory.
+ *
+ * <p>The file stores two independent slider values: {@code heldScale}
+ * and {@code popScale}.
+ */
 public final class TotemResizeConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final String FILE_NAME = "totemresize.json";
+    private static final String FILE_NAME = "totemscale.json";
 
     private static TotemResizeConfigData data = new TotemResizeConfigData();
 
@@ -25,7 +32,7 @@ public final class TotemResizeConfig {
     public static void load() {
         Path configPath = FabricLoader.getInstance().getConfigDir().resolve(FILE_NAME);
         if (!Files.exists(configPath)) {
-            save();
+            save(); // create default file
             return;
         }
 
@@ -33,8 +40,8 @@ public final class TotemResizeConfig {
             TotemResizeConfigData loaded = GSON.fromJson(reader, TotemResizeConfigData.class);
             if (loaded != null) {
                 data = loaded;
-                data.clampedSliderValue(); // ensure value is clamped
-                data.invalidateCache();    // recompute render scale from loaded value
+                data.clampValues();
+                data.invalidateCache();
             }
         } catch (Exception ignored) {
             // Fall back to defaults if file is invalid.
@@ -42,8 +49,8 @@ public final class TotemResizeConfig {
     }
 
     public static void save() {
-        data.clampedSliderValue(); // ensure value is clamped before writing
-        data.invalidateCache();    // recompute render scale from new value
+        data.clampValues();
+        data.invalidateCache();
         Path configPath = FabricLoader.getInstance().getConfigDir().resolve(FILE_NAME);
         try (BufferedWriter writer = Files.newBufferedWriter(configPath)) {
             GSON.toJson(data, writer);
