@@ -11,16 +11,16 @@ package totemresize.config;
  *
  * <p>Each level maps to a fixed render multiplier via {@link TotemScale}:
  * <pre>
- *   1  → 0.0× (not visible)
- *   2  → 0.1× (barely visible)
+ *   1  → 0.0× (invisible)
+ *   2  → 0.1× (minimalist)
  *   3  → 0.4× (small)
- *   4  → 0.7× (slightly smaller than vanilla)
- *   5  → 1.0× (vanilla / regular)
- *   6  → 1.3× (slightly larger)
- *   7  → 1.7× (larger)
- *   8  → 2.2× (big)
- *   9  → 3.0× (very large)
- *   10 → 5.0× (max size)
+ *   4  → 0.7× (slightly small)
+ *   5  → 1.0× (vanilla)
+ *   6  → 1.5× (slightly large)
+ *   7  → 2.0× (large)
+ *   8  → 3.0× (extra large)
+ *   9  → 4.0× (huge)
+ *   10 → 6.0× (screen overload)
  * </pre>
  */
 public final class TotemResizeConfigData {

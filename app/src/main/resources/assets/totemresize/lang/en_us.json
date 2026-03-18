@@ -1,14 +1,21 @@
 {
   "totemresize.title": "Totem Resizer",
 
-  "totemresize.category.held": "Held Totem",
-  "totemresize.category.pop": "Totem Pop",
+  "totemresize.category.main": "Totem Resizer Settings",
 
-  "totemresize.option.held_scale": "Held Totem Scale",
-  "totemresize.option.held_scale.tooltip": "Controls the size of the Totem of Undying in your Main Hand / Off-Hand.\n\n  1  = Not Visible (0.0×)\n  2  = Barely Visible (0.1×)\n  3  = Small (0.4×)\n  4  = Slightly Smaller (0.7×)\n  5  = Regular Size (1.0×) — Vanilla\n  6  = Slightly Larger (1.3×)\n  7  = Larger (1.7×)\n  8  = Big (2.2×)\n  9  = Very Large (3.0×)\n  10 = Max Size (5.0×)\n\nChanges apply only after you click Save & Exit.",
+  "totemresize.subcategory.held": "§6§l⚔ Handheld Display",
+  "totemresize.subcategory.held.desc": "Controls the size of the Totem of Undying when held in your Main Hand or Off-Hand (first-person view).",
+
+  "totemresize.option.held_scale": "Handheld Totem Scale",
+  "totemresize.option.held_scale.tooltip": "Select a size for the held totem.\n\n  1  = Invisible (0.0×) – GPU draws nothing\n  2  = Minimalist (0.1×)\n  3  = Small (0.4×)\n  4  = Slightly Small (0.7×)\n  5  = Vanilla (1.0×) – Default\n  6  = Slightly Large (1.5×)\n  7  = Large (2.0×)\n  8  = Extra Large (3.0×)\n  9  = Huge (4.0×)\n  10 = Screen Overload (6.0×)\n\nChanges apply instantly when you click Save & Exit.",
+  "totemresize.option.held_scale.detail": "Tip: Set to 1 (Invisible) to completely hide the totem from your hand. Set to 5 for the default Minecraft experience.",
+
+  "totemresize.subcategory.pop": "§d§l✦ On-Screen Animation (The Pop)",
+  "totemresize.subcategory.pop.desc": "Controls the size of the full-screen overlay animation that plays when a Totem of Undying saves you from death.",
 
   "totemresize.option.pop_scale": "Totem Pop Scale",
-  "totemresize.option.pop_scale.tooltip": "Controls the size of the on-screen animation when a Totem of Undying is consumed.\n\n  1  = Not Visible (0.0×)\n  2  = Barely Visible (0.1×)\n  3  = Small (0.4×)\n  4  = Slightly Smaller (0.7×)\n  5  = Regular Size (1.0×) — Vanilla\n  6  = Slightly Larger (1.3×)\n  7  = Larger (1.7×)\n  8  = Big (2.2×)\n  9  = Very Large (3.0×)\n  10 = Max Size (5.0×)\n\nChanges apply only after you click Save & Exit.",
+  "totemresize.option.pop_scale.tooltip": "Select a size for the totem pop overlay.\n\n  1  = Invisible (0.0×) – completely removed\n  2  = Minimalist (0.1×)\n  3  = Small (0.4×)\n  4  = Slightly Small (0.7×)\n  5  = Vanilla (1.0×) – Default\n  6  = Slightly Large (1.5×)\n  7  = Large (2.0×)\n  8  = Extra Large (3.0×)\n  9  = Huge (4.0×)\n  10 = Screen Overload (6.0×)\n\nChanges apply instantly when you click Save & Exit.",
+  "totemresize.option.pop_scale.detail": "Tip: Set to 1 (Invisible) to fully disable the pop animation. This is the only 100% effective way to remove it. Priority 999999 ensures no resource pack can override this.",
 
   "key.categories.totemresize": "Totem Resizer",
   "key.totemresize.open_config": "Open Config"

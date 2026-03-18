@@ -10,16 +10,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Handles loading and saving of {@link TotemResizeConfigData} to
- * {@code totemscale.json} in the Fabric config directory.
+ * Central configuration manager for Totem Resizer.
  *
- * <p>The file stores two independent dropdown values: {@code heldScale}
- * and {@code popScale} (each an integer 1–10).
- *
- * <p>Cached render scale floats ({@link #getHeldScale()} and
- * {@link #getPopScale()}) are updated <em>only</em> when
- * {@link #save()} is called (i.e. when the user clicks "Save & Exit"),
- * ensuring in-game rendering is never disrupted mid-configuration.
+ * <h2>Design</h2>
+ * <ul>
+ *   <li>Persists {@link TotemResizeConfigData} to {@code totemscale.json} in
+ *       the Fabric config directory.</li>
+ *   <li>Exposes <b>public static volatile</b> render-scale floats so every
+ *       Mixin can read them with zero indirection.  Changes propagate the
+ *       instant {@link #save()} (or {@link #load()}) is called – i.e. the
+ *       moment the user clicks "Save &amp; Exit".</li>
+ * </ul>
  */
 public final class TotemResizeConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -27,33 +28,44 @@ public final class TotemResizeConfig {
 
     private static TotemResizeConfigData data = new TotemResizeConfigData();
 
-    // ── Local cached scale values used by mixins (fast path, no object access) ──
-    private static volatile float cachedHeldScale = 1.0f;
-    private static volatile float cachedPopScale = 1.0f;
+    // ── Public static volatile fields read directly by Mixins ──────────
+    // Marked public + volatile so any Mixin hot-path can read them with
+    // a single field-read – no method call, no object dereference.
+    // Updated ONLY inside load() and save(), guaranteeing the game never
+    // sees a half-written state.
+
+    /** Current held-totem render scale (read by HeldItemRendererMixin). */
+    public static volatile float heldScale = 1.0f;
+
+    /** Current pop-animation render scale (read by InGameHudMixin). */
+    public static volatile float popScale = 1.0f;
 
     private TotemResizeConfig() {
     }
 
+    /** Returns the mutable config data object (used by the config screen). */
     public static TotemResizeConfigData get() {
         return data;
     }
 
-    /**
-     * Returns the held-totem render scale. Called from the mixin hot path.
-     * This value is refreshed only on {@link #load()} and {@link #save()}.
-     */
+    // ── Convenience getters (kept for backwards compatibility) ─────────
+
+    /** @return current held-totem render scale */
     public static float getHeldScale() {
-        return cachedHeldScale;
+        return heldScale;
     }
+
+    /** @return current pop-animation render scale */
+    public static float getPopScale() {
+        return popScale;
+    }
+
+    // ── Persistence ────────────────────────────────────────────────────
 
     /**
-     * Returns the pop-animation render scale. Called from the mixin hot path.
-     * This value is refreshed only on {@link #load()} and {@link #save()}.
+     * Loads config from disk (or creates a default file if absent).
+     * Updates the public static volatile fields immediately.
      */
-    public static float getPopScale() {
-        return cachedPopScale;
-    }
-
     public static void load() {
         Path configPath = FabricLoader.getInstance().getConfigDir().resolve(FILE_NAME);
         if (!Files.exists(configPath)) {
@@ -69,11 +81,17 @@ public final class TotemResizeConfig {
                 data.invalidateCache();
             }
         } catch (Exception ignored) {
-            // Fall back to defaults if file is invalid.
+            // Fall back to defaults if the file is corrupted.
         }
-        refreshCachedScales();
+        refreshPublicFields();
     }
 
+    /**
+     * Saves the current config to disk and refreshes the public static
+     * volatile fields so all Mixins see the update <b>instantly</b>.
+     *
+     * <p>This is the callback wired to Cloth Config's "Save &amp; Exit".
+     */
     public static void save() {
         data.clampValues();
         data.invalidateCache();
@@ -83,17 +101,16 @@ public final class TotemResizeConfig {
         } catch (Exception ignored) {
             // Ignore write failures.
         }
-        refreshCachedScales();
+        refreshPublicFields();
     }
 
     /**
-     * Copies the computed render scales from the config data object into
-     * the static volatile fields used by the mixin hot path.
-     * Called after every load / save so changes only take effect when
-     * the user clicks "Save & Exit".
+     * Copies the computed scales into the public static volatile fields.
+     * Called after every load/save so the mixin hot-path always has the
+     * freshest values with zero indirection.
      */
-    private static void refreshCachedScales() {
-        cachedHeldScale = data.getHeldRenderScale();
-        cachedPopScale = data.getPopRenderScale();
+    private static void refreshPublicFields() {
+        heldScale = data.getHeldRenderScale();
+        popScale  = data.getPopRenderScale();
     }
 }
