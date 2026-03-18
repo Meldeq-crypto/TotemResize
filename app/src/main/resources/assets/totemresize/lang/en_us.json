@@ -4,11 +4,11 @@
   "totemresize.category.held": "Held Totem",
   "totemresize.category.pop": "Totem Pop",
 
-  "totemresize.option.held_scale": "Held Totem Scale (1–10)",
-  "totemresize.option.held_scale.tooltip": "Controls the size of the Totem of Undying in your Main Hand / Off-Hand.\n\n  1  = 0.1× (tiny, barely visible)\n  5  = 1.0× (default Minecraft size)\n  10 = 5.0× (massive, screen-filling)\n\nChanges apply only after you click Save & Exit.",
+  "totemresize.option.held_scale": "Held Totem Scale",
+  "totemresize.option.held_scale.tooltip": "Controls the size of the Totem of Undying in your Main Hand / Off-Hand.\n\n  1  = Not Visible (0.0×)\n  2  = Barely Visible (0.1×)\n  3  = Small (0.4×)\n  4  = Slightly Smaller (0.7×)\n  5  = Regular Size (1.0×) — Vanilla\n  6  = Slightly Larger (1.3×)\n  7  = Larger (1.7×)\n  8  = Big (2.2×)\n  9  = Very Large (3.0×)\n  10 = Max Size (5.0×)\n\nChanges apply only after you click Save & Exit.",
 
-  "totemresize.option.pop_scale": "Totem Pop Scale (1–10)",
-  "totemresize.option.pop_scale.tooltip": "Controls the size of the on-screen animation when a Totem of Undying is consumed.\n\n  1  = 0.1× (tiny, barely visible)\n  5  = 1.0× (default Minecraft size)\n  10 = 5.0× (massive, screen-filling)\n\nChanges apply only after you click Save & Exit.",
+  "totemresize.option.pop_scale": "Totem Pop Scale",
+  "totemresize.option.pop_scale.tooltip": "Controls the size of the on-screen animation when a Totem of Undying is consumed.\n\n  1  = Not Visible (0.0×)\n  2  = Barely Visible (0.1×)\n  3  = Small (0.4×)\n  4  = Slightly Smaller (0.7×)\n  5  = Regular Size (1.0×) — Vanilla\n  6  = Slightly Larger (1.3×)\n  7  = Larger (1.7×)\n  8  = Big (2.2×)\n  9  = Very Large (3.0×)\n  10 = Max Size (5.0×)\n\nChanges apply only after you click Save & Exit.",
 
   "key.categories.totemresize": "Totem Resizer",
   "key.totemresize.open_config": "Open Config"

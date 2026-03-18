@@ -21,10 +21,13 @@ import totemresize.config.TotemResizeConfig;
  * and applies centre-anchored scaling so the animation stays perfectly centred
  * on screen even at extreme sizes.
  *
+ * <p>Uses priority <b>10001</b> so this mixin applies after virtually all
+ * other mods and texture packs, preventing them from overriding the scale.
+ *
  * <p>Multiple injection targets are declared with {@code require = 0} for
  * cross-version compatibility across 1.21.1 – 1.21.x builds.
  */
-@Mixin(value = InGameHud.class, priority = 1001)
+@Mixin(value = InGameHud.class, priority = 10001)
 public abstract class InGameHudMixin {
 
     /**
@@ -64,7 +67,7 @@ public abstract class InGameHudMixin {
 
     @Unique
     private void applyPopScale(DrawContext context) {
-        float scale = TotemResizeConfig.get().getPopRenderScale();
+        float scale = TotemResizeConfig.getPopScale();
         if (Float.compare(scale, 1.0f) == 0) {
             totemResize$pushed = false;
             return;
@@ -74,11 +77,17 @@ public abstract class InGameHudMixin {
         matrices.push();
         totemResize$pushed = true;
 
+        if (Float.compare(scale, 0.0f) == 0) {
+            // Not visible: scale to zero so nothing renders
+            matrices.scale(0.0f, 0.0f, 0.0f);
+            return;
+        }
+
         // Centre-anchored scaling: translate to screen centre, scale,
         // translate back so the overlay stays perfectly centred.
         MinecraftClient client = MinecraftClient.getInstance();
-        int centreX = client.getWindow().getScaledWidth() / 2;
-        int centreY = client.getWindow().getScaledHeight() / 2;
+        float centreX = client.getWindow().getScaledWidth() / 2.0f;
+        float centreY = client.getWindow().getScaledHeight() / 2.0f;
         matrices.translate(centreX, centreY, 0);
         matrices.scale(scale, scale, 1.0f);
         matrices.translate(-centreX, -centreY, 0);

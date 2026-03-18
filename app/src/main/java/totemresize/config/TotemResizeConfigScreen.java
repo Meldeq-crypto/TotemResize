@@ -13,8 +13,13 @@ import net.minecraft.text.Text;
  *   <li><b>Totem Pop</b>  – size of the on-screen totem animation when consumed.</li>
  * </ol>
  *
- * <p>Both use a 1–10 integer slider.  Changes are only applied when the user
- * clicks <b>Save &amp; Exit</b> (via the {@code setSavingRunnable} callback).
+ * <p>Both use a <b>dropdown (enum selector)</b> with the {@link TotemScale}
+ * enum, offering 10 fixed-size options from "Not Visible" (0.0×) to
+ * "Max Size" (5.0×).
+ *
+ * <p>Changes are only applied when the user clicks <b>Save &amp; Exit</b>
+ * (via the {@code setSavingRunnable} callback), which persists to disk
+ * and refreshes the cached render scales used by the mixins.
  */
 public final class TotemResizeConfigScreen {
     private TotemResizeConfigScreen() {
@@ -36,17 +41,14 @@ public final class TotemResizeConfigScreen {
         ConfigCategory heldCategory = builder.getOrCreateCategory(
             Text.translatable("totemresize.category.held"));
 
-        heldCategory.addEntry(entryBuilder.startIntSlider(
+        heldCategory.addEntry(entryBuilder.startEnumSelector(
                 Text.translatable("totemresize.option.held_scale"),
-                clamp(config.heldScale),
-                1, 10)
-            .setDefaultValue(5)
-            .setTextGetter(value -> {
-                float preview = TotemResizeConfigData.computeScale(value);
-                return Text.literal(value + "  (\u2248 " + String.format("%.2f", preview) + "\u00d7 scale)");
-            })
+                TotemScale.class,
+                config.getHeldTotemScale())
+            .setDefaultValue(TotemScale.REGULAR)
+            .setEnumNameProvider(value -> Text.literal(((TotemScale) value).getDisplayName()))
             .setTooltip(Text.translatable("totemresize.option.held_scale.tooltip"))
-            .setSaveConsumer(value -> config.heldScale = value)
+            .setSaveConsumer(value -> config.heldScale = value.getLevel())
             .build());
 
         // ────────────────────────────────────────────────────────────────
@@ -55,26 +57,16 @@ public final class TotemResizeConfigScreen {
         ConfigCategory popCategory = builder.getOrCreateCategory(
             Text.translatable("totemresize.category.pop"));
 
-        popCategory.addEntry(entryBuilder.startIntSlider(
+        popCategory.addEntry(entryBuilder.startEnumSelector(
                 Text.translatable("totemresize.option.pop_scale"),
-                clamp(config.popScale),
-                1, 10)
-            .setDefaultValue(5)
-            .setTextGetter(value -> {
-                float preview = TotemResizeConfigData.computeScale(value);
-                return Text.literal(value + "  (\u2248 " + String.format("%.2f", preview) + "\u00d7 scale)");
-            })
+                TotemScale.class,
+                config.getPopTotemScale())
+            .setDefaultValue(TotemScale.REGULAR)
+            .setEnumNameProvider(value -> Text.literal(((TotemScale) value).getDisplayName()))
             .setTooltip(Text.translatable("totemresize.option.pop_scale.tooltip"))
-            .setSaveConsumer(value -> config.popScale = value)
+            .setSaveConsumer(value -> config.popScale = value.getLevel())
             .build());
 
         return builder.build();
-    }
-
-    /** Clamp helper so the slider never receives an out-of-range initial value. */
-    private static int clamp(int v) {
-        if (v < 1) return 1;
-        if (v > 10) return 10;
-        return v;
     }
 }

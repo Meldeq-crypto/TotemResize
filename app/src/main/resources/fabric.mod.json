@@ -3,7 +3,7 @@
   "id": "totemresize",
   "version": "${version}",
   "name": "Totem Resizer",
-  "description": "Client-side Totem of Undying resizer with a config screen (1–10 scale slider).",
+  "description": "Client-side Totem of Undying resizer with a config screen (1–10 scale dropdown).",
   "authors": [
     "YourName"
   ],
