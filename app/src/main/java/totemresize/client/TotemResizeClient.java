@@ -10,6 +10,17 @@ import org.lwjgl.glfw.GLFW;
 import totemresize.config.TotemResizeConfig;
 import totemresize.config.TotemResizeConfigScreen;
 
+/**
+ * Client-side entry point for the Totem Resizer mod.
+ *
+ * <p>Loads the configuration from {@code totemscale.json} at startup and
+ * registers a keybinding (default: J) to open the Interactive Canvas
+ * config screen.
+ *
+ * <p>This mod is entirely <b>client-side only</b> — it never touches the
+ * server or sends any packets. All rendering transforms are applied via
+ * Mixins with priority {@code Integer.MAX_VALUE}.
+ */
 public class TotemResizeClient implements ClientModInitializer {
     public static final String MOD_ID = "totemresize";
     public static final String KEY_CATEGORY = "key.categories.totemresize";

@@ -2,8 +2,10 @@
   "required": true,
   "package": "totemresize.mixin",
   "compatibilityLevel": "JAVA_21",
+  "priority": 2147483647,
   "client": [
     "HeldItemRendererMixin",
+    "GameRendererMixin",
     "InGameHudMixin"
   ],
   "injectors": {

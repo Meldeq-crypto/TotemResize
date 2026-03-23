@@ -3,7 +3,7 @@
   "id": "totemresize",
   "version": "${version}",
   "name": "Totem Resizer",
-  "description": "Client-side Totem of Undying resizer with a config screen (1–10 scale dropdown).",
+  "description": "Client-side Totem of Undying resizer with an Interactive Canvas visual editor. Features corner-drag resizing, dual-view tabs for held position and pop animation, resource pack synergy (multiplies rather than overrides), and Matrix4f-based transforms. Uses the provided totem_of_undying.json as the baseline at slider value 5 (1.0×).",
   "authors": [
     "YourName"
   ],

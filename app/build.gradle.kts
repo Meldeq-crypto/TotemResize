@@ -30,9 +30,6 @@ dependencies {
     modImplementation(libs.fabric.loader)
     modImplementation(libs.fabric.api)
 
-    modApi(libs.cloth.config)
-    include(libs.cloth.config)
-
     modApi(libs.modmenu)
 }
 
