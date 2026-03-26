@@ -25,12 +25,9 @@ import java.nio.file.Path;
  *       config screen — via {@link #save()}.</li>
  * </ul>
  *
- * <h2>Unified Scale</h2>
- * <p>A single "Visual Scale" (slider 1–10 → multiplier 0.0×–6.0×)
- * controls <b>both</b> the held item and the pop animation. Slider 5.0
- * maps to 1.0×, aligning with the baseline from the provided
- * totem_of_undying.json. Both {@code heldScale} and {@code popScale} are
- * always identical.</p>
+ * <h2>Separate Scales</h2>
+ * <p>The held-item scale and pop-animation scale are now independent.
+ * X/Y offsets and a static-totem toggle are also exposed.</p>
  *
  * <h2>Backward Compatibility</h2>
  * <p>If an existing {@code totemscale.json} contains the old
@@ -50,6 +47,15 @@ public final class TotemResizeConfig {
 
     /** Current pop-animation render scale (read by GameRendererMixin). */
     public static volatile float popScale = 1.0f;
+
+    /** Current X-axis offset for the held totem. */
+    public static volatile float xOffset = 0.0f;
+
+    /** Current Y-axis offset for the held totem. */
+    public static volatile float yOffset = 0.0f;
+
+    /** Whether to disable the vanilla bobbing animation for the held totem. */
+    public static volatile boolean staticTotem = false;
 
     private TotemResizeConfig() {
     }
@@ -86,11 +92,10 @@ public final class TotemResizeConfig {
                     double oldHeld = obj.get("heldSlider").getAsDouble();
                     double oldPop = obj.get("popSlider").getAsDouble();
                     data = new TotemResizeConfigData();
-                    // Average the two old values for migration
                     data.visualScale = (oldHeld + oldPop) / 2.0;
+                    data.popVisualScale = data.visualScale;
                     data.clampValues();
                     data.invalidateCache();
-                    // Save in new format immediately
                     save();
                     return;
                 }
@@ -100,6 +105,10 @@ public final class TotemResizeConfig {
             TotemResizeConfigData loaded = GSON.fromJson(content, TotemResizeConfigData.class);
             if (loaded != null) {
                 data = loaded;
+                // Migration: if popVisualScale was not in the file, default to visualScale
+                if (!content.contains("popVisualScale")) {
+                    data.popVisualScale = data.visualScale;
+                }
                 data.clampValues();
                 data.invalidateCache();
             }
@@ -112,8 +121,6 @@ public final class TotemResizeConfig {
     /**
      * Saves the current config to disk and refreshes the public static
      * volatile fields so all Mixins see the update <b>instantly</b>.
-     *
-     * <p>This is the callback wired to the config screen's "Save &amp; Exit".
      */
     public static void save() {
         data.clampValues();
@@ -122,13 +129,12 @@ public final class TotemResizeConfig {
         try (BufferedWriter writer = Files.newBufferedWriter(configPath)) {
             GSON.toJson(data, writer);
         } catch (Exception ignored) {
-            // Ignore write failures.
         }
         refreshPublicFields();
     }
 
     /**
-     * Resets config to JSON baseline defaults (slider 5.0 = 1.0×) and saves.
+     * Resets config to defaults and saves.
      */
     public static void resetToJsonDefaults() {
         data.resetToJsonDefaults();
@@ -136,14 +142,15 @@ public final class TotemResizeConfig {
     }
 
     /**
-     * Copies the computed scale into the public static volatile fields.
-     * Both heldScale and popScale use the same unified value.
+     * Copies the computed values into the public static volatile fields.
      * Called after every load/save so the mixin hot-path always has the
      * freshest values with zero indirection.
      */
     private static void refreshPublicFields() {
-        float scale = data.getRenderScale();
-        heldScale = scale;
-        popScale  = scale;
+        heldScale   = data.getRenderScale();
+        popScale    = data.getPopRenderScale();
+        xOffset     = (float) data.xOffset;
+        yOffset     = (float) data.yOffset;
+        staticTotem = data.staticTotem;
     }
 }

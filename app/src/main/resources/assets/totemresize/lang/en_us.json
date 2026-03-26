@@ -5,9 +5,21 @@
 
   "totemresize.button.save": "Save & Exit",
   "totemresize.button.cancel": "Cancel",
-  "totemresize.button.reset": "Reset to JSON Defaults",
+  "totemresize.button.reset": "Reset to Defaults",
 
-  "totemresize.instruction.idle": "Drag any corner to resize  |  Scroll to fine-tune",
+  "totemresize.slider.held_scale": "Held Scale",
+  "totemresize.slider.x_offset": "X-Offset",
+  "totemresize.slider.y_offset": "Y-Offset",
+  "totemresize.slider.pop_scale": "Pop Scale",
+  "totemresize.toggle.static": "Static Totem",
+  "totemresize.toggle.static.on": "Static: ON",
+  "totemresize.toggle.static.off": "Static: OFF",
+
+  "totemresize.section.held": "Held Totem",
+  "totemresize.section.pop": "Pop Animation",
+  "totemresize.section.options": "Options",
+
+  "totemresize.instruction.idle": "Drag corners to resize  |  Scroll to fine-tune  |  Use sliders for precision",
   "totemresize.instruction.dragging": "Dragging... release to set size",
   "totemresize.instruction.invisible": "(Invisible)",
 

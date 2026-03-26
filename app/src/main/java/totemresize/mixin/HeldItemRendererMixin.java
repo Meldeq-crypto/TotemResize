@@ -24,35 +24,26 @@ import totemresize.util.TotemResizeUtil;
  * {@code matrices.scale(size, size, size)} when the item is a totem. We follow
  * the same pattern for maximum compatibility.
  *
+ * <h2>Features</h2>
+ * <ul>
+ *   <li><b>Scale:</b> Uniform scale from config slider.</li>
+ *   <li><b>X/Y Offset:</b> Translates the totem position in first-person.</li>
+ *   <li><b>Static Mode:</b> When enabled, counteracts vanilla bobbing by
+ *       zeroing out the swing and equip progress parameters.</li>
+ * </ul>
+ *
  * <h2>Priority</h2>
  * <p>Set to {@code Integer.MAX_VALUE} to guarantee this mixin runs last,
  * after every other mod and resource pack has applied their transforms.
  *
  * <h2>Resource Pack Synergy</h2>
  * <p>The scale multiplier is applied <b>after</b> the bakedModel transforms
- * are applied by the rendering pipeline. This means:
- * <ul>
- *   <li>If a resource pack has its own totem_of_undying.json with custom
- *       display values (e.g., different scale, translation, rotation), those
- *       values are applied first by Minecraft's model system.</li>
- *   <li>Our mixin then <b>multiplies</b> the result by the user's custom
- *       scale, preserving 3D models and custom offsets from packs.</li>
- *   <li>The JSON baseline (scale: [0.6, 0.6, 0.6]) corresponds to slider
- *       value 5 (1.0× multiplier), so at default the totem renders exactly
- *       as the resource pack intended.</li>
- * </ul>
- *
- * <h2>Synchronization with Pop</h2>
- * <p>Both this mixin and {@link GameRendererMixin} read from the same unified
- * {@code TotemResizeConfig.heldScale} / {@code popScale} volatile fields, which
- * are always identical. This ensures the size in hand and the pop animation
- * are perfectly synchronized.</p>
+ * are applied by the rendering pipeline. This means resource packs' custom
+ * display values are preserved but resized.</p>
  *
  * <h2>Anti-Jitter</h2>
  * <p>We use {@code MatrixStack.scale()} (the high-level API) instead of
- * directly manipulating the {@code Matrix4f}. This avoids floating-point
- * precision issues that can cause jitter or flicker when resizing in the
- * config menu.</p>
+ * directly manipulating the {@code Matrix4f}.</p>
  */
 @Mixin(value = HeldItemRenderer.class, priority = Integer.MAX_VALUE)
 public class HeldItemRendererMixin {
@@ -74,33 +65,25 @@ public class HeldItemRendererMixin {
         if (hand == Hand.MAIN_HAND) {
             return mainArm;
         }
-        // Offhand is the opposite arm.
         return mainArm == Arm.RIGHT ? Arm.LEFT : Arm.RIGHT;
     }
 
     /**
-     * Injects at HEAD of renderFirstPersonItem to apply our scale transform
-     * before the vanilla rendering logic runs.
+     * Injects at HEAD of renderFirstPersonItem to apply our scale, offset,
+     * and static-mode transforms before the vanilla rendering logic runs.
+     *
+     * <h3>Static Mode</h3>
+     * <p>When static mode is enabled, we counteract the vanilla bobbing
+     * animation by applying a counter-translation that zeros out the
+     * swing-progress and equip-progress effects. The vanilla method uses
+     * these to create the bobbing/swinging motion, so we translate the
+     * matrix stack back to a neutral position.</p>
      *
      * <h3>Left-hand (offhand) fix</h3>
      * <p>Vanilla mirrors the left-hand model by applying a {@code -1} multiplier
-     * on the X axis for translations and rotations. When we apply a uniform
-     * scale at HEAD, the mirrored translations get magnified, pushing the model
-     * off-center. Additionally, the combination of our positive scale with
-     * vanilla's negative-X mirror produces a transformation matrix whose
-     * determinant's sign can cause back-face culling to hide the wrong faces,
-     * making one side of the totem appear invisible.</p>
-     *
-     * <p>We fix this by:
-     * <ol>
-     *   <li>For <b>both hands</b>: applying the scale uniformly.</li>
-     *   <li>For the <b>left hand (offhand)</b>: temporarily disabling back-face
-     *       culling so the mirrored+scaled geometry renders all faces. Culling
-     *       is re-enabled in the TAIL injection.</li>
-     *   <li>For the <b>left hand</b>: applying a small X-axis translation
-     *       correction proportional to {@code (scale - 1)} to compensate for
-     *       the shifted pivot caused by the mirrored transforms being scaled.</li>
-     * </ol>
+     * on the X axis. When we apply a uniform scale at HEAD, the mirrored
+     * translations get magnified. We compensate with a counter-translation
+     * and disable back-face culling.</p>
      */
     @Inject(
             method = "renderFirstPersonItem",
@@ -118,10 +101,17 @@ public class HeldItemRendererMixin {
             return;
         }
 
-        // Read the public static volatile field – zero indirection.
+        // Read the public static volatile fields – zero indirection.
         float scale = TotemResizeConfig.heldScale;
+        float xOff = TotemResizeConfig.xOffset;
+        float yOff = TotemResizeConfig.yOffset;
 
-        // Vanilla size (1.0×) → skip entirely for zero overhead.
+        // Apply X/Y offset (always, even at default scale)
+        if (xOff != 0.0f || yOff != 0.0f) {
+            matrices.translate(xOff, yOff, 0.0f);
+        }
+
+        // Vanilla size (1.0×) → skip scale entirely for zero overhead.
         if (Float.compare(scale, 1.0f) == 0) {
             return;
         }
@@ -137,30 +127,14 @@ public class HeldItemRendererMixin {
 
         if (isLeftArm) {
             // ── Left-hand / offhand fix ────────────────────────────────
-            //
-            // Vanilla mirrors the left hand with a -1 X multiplier applied
-            // to translations and rotations inside renderFirstPersonItem.
-            // When we pre-scale uniformly, those mirrored offsets are
-            // magnified, causing the model to shift sideways. We compensate
-            // by applying a counter-translation on X proportional to how
-            // much the scale deviates from 1.0.
-            //
-            // The constant 0.28 was tuned to keep the offhand model in its
-            // natural screen position across the full slider range (0×–6×).
             float drift = (scale - 1.0f) * 0.28f;
             matrices.translate(drift, 0.0f, 0.0f);
 
-            // Disable back-face culling. The combination of our positive
-            // uniform scale with vanilla's negative-X mirror produces a
-            // negative determinant, which reverses the face winding order.
-            // Without this, one side of the totem is invisible.
             RenderSystem.disableCull();
             totemResize$didDisableCull = true;
         }
 
-        // Apply uniform scale. For the right hand this is all that's needed.
-        // For the left hand, the translate + cull-disable above fix the
-        // mirroring artefacts.
+        // Apply uniform scale.
         matrices.scale(scale, scale, scale);
     }
 
@@ -181,6 +155,50 @@ public class HeldItemRendererMixin {
         if (totemResize$didDisableCull) {
             RenderSystem.enableCull();
             totemResize$didDisableCull = false;
+        }
+    }
+
+    /**
+     * Static Mode: Intercepts the bobEquip call to neutralize bobbing.
+     *
+     * <p>Vanilla calls {@code HeldItemRenderer.renderFirstPersonItem}
+     * which internally uses {@code swingProgress} and {@code equipProgress}
+     * to produce the bobbing/swinging animation. When static mode is on,
+     * we cancel the bob by resetting the equip offset.
+     *
+     * <p>This injection targets the {@code applyEquipOffset} method which
+     * vanilla uses to translate the item based on equip progress. We zero
+     * out the translation when the totem should be static.</p>
+     */
+    @Inject(
+            method = "applyEquipOffset",
+            at = @At("HEAD"),
+            cancellable = true,
+            require = 0
+    )
+    private void totemResize$cancelEquipBob(MatrixStack matrices, Arm arm, float equipProgress, CallbackInfo info) {
+        if (TotemResizeConfig.staticTotem) {
+            // Cancel the equip offset animation entirely for a static look.
+            // We don't cancel it — we just apply zero offset.
+            info.cancel();
+        }
+    }
+
+    /**
+     * Static Mode: Intercepts the swing animation to neutralize hand swing.
+     *
+     * <p>When static totem is enabled, this cancels the swing animation
+     * that causes the hand to move when attacking or using items.</p>
+     */
+    @Inject(
+            method = "applySwingOffset",
+            at = @At("HEAD"),
+            cancellable = true,
+            require = 0
+    )
+    private void totemResize$cancelSwingBob(MatrixStack matrices, Arm arm, float swingProgress, CallbackInfo info) {
+        if (TotemResizeConfig.staticTotem) {
+            info.cancel();
         }
     }
 }
